@@ -24,6 +24,7 @@ public class UserService {
 
     @Transactional
     public UserResponse updateUsername(String userEmail, UpdateUsernameVO updateUsernameVO) {
+        checkUsername(updateUsernameVO.username());
         User user = getUser(userEmail);
         userRepository.updateUsername(updateUsernameVO.username(), user.getId());
         return new UserResponse(user.getId());
@@ -34,6 +35,12 @@ public class UserService {
         User user = getUser(userEmail);
         userRepository.updateProfileImage(updateProfileImageVO.profileImageUrl(), user.getId());
         return new UserResponse(user.getId());
+    }
+
+    private void checkUsername(String username) {
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("이미 존재하는 이름 입니다.");
+        }
     }
 
     private User getUser(String userEmail) {

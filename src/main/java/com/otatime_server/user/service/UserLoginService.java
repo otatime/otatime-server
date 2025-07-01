@@ -27,7 +27,8 @@ public class UserLoginService {
 
     @Transactional
     public UserResponse join(JoinRequest joinRequest) {
-
+        checkEmail(joinRequest.email());
+        checkUsername(joinRequest.username());
         User user = new User(
                 joinRequest.email(),
                 joinRequest.password(),
@@ -42,6 +43,18 @@ public class UserLoginService {
         publisher.publishEvent(new EmailAuthEvent(savedUser.getId(), savedUser.getEmail()));
 
         return new UserResponse(savedUser.getId());
+    }
+
+    private void checkEmail(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("이미 존재하는 이메일 입니다.");
+        }
+    }
+
+    private void checkUsername(String username) {
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("이미 존재하는 이름 입니다.");
+        }
     }
 
     public EmailVo login(LoginRequest loginRequest) {

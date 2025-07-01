@@ -19,4 +19,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying(flushAutomatically = true)
     @Query("update User u set u.profileImageUrl = :profileImageUrl where u.id = :userId")
     void updateProfileImage(@Param("profileImageUrl") String profileImage, @Param("userId") Long id);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByUsername(String username);
 }

@@ -6,16 +6,23 @@ spring:
     url: jdbc:mysql://localhost:3306/otatime
 
   jpa:
+    show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
+        use_sql_comments: true
+        format_sql: true  # SQL 포맷팅을 활성화
         default_batch_fetch_size: 1000
         jdbc:
           time_zone: UTC
-        format_sql: true   # SQL 포맷팅을 활성화
 
 redis:
   host: localhost
   port: 6379
   password:
+
+logging:
+  level:
+    org.hibernate.type.descriptor.sql: trace
+    org.springframework.web.servlet.handler.HandlerMappingIntrospector: error

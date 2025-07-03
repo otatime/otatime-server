@@ -44,6 +44,8 @@ dependencies {
 	implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.773'
 	implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+
+	runtimeOnly 'com.h2database:h2'
 }
 
 tasks.named('test') {

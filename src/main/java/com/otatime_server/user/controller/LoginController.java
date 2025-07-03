@@ -2,6 +2,7 @@ package com.otatime_server.user.controller;
 
 import com.otatime_server.auth.service.JwtService;
 import com.otatime_server.global.dto.CommonResponse;
+import com.otatime_server.global.dto.EmptyDto;
 import com.otatime_server.global.dto.TokenResponse;
 import com.otatime_server.user.dto.EmailVo;
 import com.otatime_server.user.dto.JoinRequest;
@@ -34,12 +35,19 @@ public class LoginController {
 
     @PostMapping("/re-issue")
     public CommonResponse<TokenResponse> reIssueToken(HttpServletRequest request) {
-        String token = getRefreshToken(request);
+        String token = getToken(request);
         EmailVo emailByToken = userLoginService.findEmailByToken(token);
         return new CommonResponse<>(jwtService.toTokenResponse(emailByToken.email()));
     }
 
-    private String getRefreshToken(HttpServletRequest request) {
+    @PostMapping("/logout")
+    public CommonResponse<EmptyDto> logout(HttpServletRequest request) {
+        String token = getToken(request);
+        userLoginService.logout(token);
+        return CommonResponse.EMPTY;
+    }
+
+    private String getToken(HttpServletRequest request) {
         String authentication = request.getHeader("Authorization");
         authentication = authentication.substring("Bearer".length()).trim();
         return authentication;

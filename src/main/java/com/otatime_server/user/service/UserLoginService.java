@@ -74,4 +74,9 @@ public class UserLoginService {
         refreshTokenRepository.delete(refreshToken);
         return new EmailVo(email);
     }
+
+    public void logout(String token) {
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(token).orElseThrow();
+        refreshTokenRepository.delete(refreshToken);
+    }
 }

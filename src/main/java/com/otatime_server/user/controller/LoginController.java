@@ -40,7 +40,7 @@ public class LoginController {
     }
 
     private String getRefreshToken(HttpServletRequest request) {
-        String authentication = request.getHeader("Authentication");
+        String authentication = request.getHeader("Authorization");
         authentication = authentication.substring("Bearer".length()).trim();
         return authentication;
     }

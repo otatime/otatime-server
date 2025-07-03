@@ -1,8 +1,9 @@
 spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MYSQL;NON_KEYWORDS=USER
   profiles:
-    active: local
     include: secret
-
-  jpa:
-    hibernate:
-      ddl-auto: validate
+  redis:
+    host: localhost
+    port: 6379
+    password:

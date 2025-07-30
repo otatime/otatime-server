@@ -1,5 +1,7 @@
 package com.otatime_server.user.service;
 
+import com.otatime_server.like.domain.PostLike;
+import com.otatime_server.like.repository.PostLikeRepository;
 import com.otatime_server.user.domain.User;
 import com.otatime_server.user.dto.MyPageResponse;
 import com.otatime_server.user.dto.UpdateProfileImageVO;
@@ -7,6 +9,9 @@ import com.otatime_server.user.dto.UpdateUsernameVO;
 import com.otatime_server.user.dto.UserResponse;
 import com.otatime_server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PostLikeRepository postLikeRepository;
 
     public MyPageResponse getMyPage(String userEmail) {
         User user = getUser(userEmail);
@@ -36,6 +42,16 @@ public class UserService {
         userRepository.updateProfileImage(updateProfileImageVO.profileImageUrl(), user.getId());
         return new UserResponse(user.getId());
     }
+
+    public Page<PostLike> getPostLikes(String email) {
+        User user = getUser(email);
+
+        return postLikeRepository.findByUserId(
+                user.getId(),
+                PageRequest.of(0, 10, Sort.by("post_like_id").descending())
+        );
+    }
+
 
     private void checkUsername(String username) {
         if (userRepository.existsByUsername(username)) {

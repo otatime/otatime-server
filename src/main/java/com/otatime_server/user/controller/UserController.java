@@ -1,12 +1,14 @@
 package com.otatime_server.user.controller;
 
 import com.otatime_server.global.dto.CommonResponse;
+import com.otatime_server.like.domain.PostLike;
 import com.otatime_server.user.dto.MyPageResponse;
 import com.otatime_server.user.dto.UpdateProfileImageVO;
 import com.otatime_server.user.dto.UpdateUsernameVO;
 import com.otatime_server.user.dto.UserResponse;
 import com.otatime_server.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -36,6 +38,12 @@ public class UserController {
     @PatchMapping("/image")
     public CommonResponse<UserResponse> changeImage(@RequestBody UpdateProfileImageVO profileImage) {
         return new CommonResponse<>(userService.updateProfileImage(getLoginUserEmail(), profileImage));
+    }
+
+    @GetMapping("/like")
+    public CommonResponse<Page<PostLike>> getMyLike() {
+        String loginUserEmail = getLoginUserEmail();
+        return new CommonResponse<>(userService.getPostLikes(loginUserEmail));
     }
 
     private String getLoginUserEmail() {

@@ -9,6 +9,9 @@ import com.otatime_server.post.domain.Post;
 import com.otatime_server.post.domain.Region;
 import com.otatime_server.post.dto.PostDetail;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -175,49 +178,58 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     @Override
     public Page<PostDetail> searchPosts(Pageable pageable, String query, Long userId) {
-
-        // 사용자가 좋아요한 게시글 id 조회
-        List<Long> likeIds = queryFactory.select(postLike.postId)
-                .from(postLike)
-                .where(postLike.userId.eq(userId))
-                .fetch();
-
-        // 오늘 날짜
         LocalDate today = LocalDate.now();
 
-        // 검색 + 오늘 이후 + 제목/내용 포함
+        // Full-Text 조건
+        BooleanExpression fullTextCondition = Expressions.booleanTemplate(
+                "MATCH({0}, {1}) AGAINST({2} IN BOOLEAN MODE)",
+                post.title, post.details, "+" + query + "*"
+        );
+
+        // 게시글 목록 조회
         List<Post> posts = queryFactory.selectFrom(post)
                 .where(
                         post.startDate.goe(today),
-                        post.title.containsIgnoreCase(query)
-                                .or(post.details.containsIgnoreCase(query))
+                        fullTextCondition
                 )
-                .orderBy(post.startDate.asc())
+                .orderBy(post.startDate.asc(), post.id.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-
-        // 전체 카운트 (페이징 total count)
-        Long total = queryFactory.select(post.count())
-                .from(post)
-                .where(
-                        post.startDate.goe(today),
-                        post.title.containsIgnoreCase(query)
-                                .or(post.details.containsIgnoreCase(query))
-                )
-                .fetchOne();
 
         if (posts.isEmpty()) {
             return new PageImpl<>(Collections.emptyList(), pageable, 0);
         }
 
+        // 총 개수 조회
+        Long total = queryFactory.select(post.count())
+                .from(post)
+                .where(
+                        post.startDate.goe(today),
+                        fullTextCondition
+                )
+                .fetchOne();
+
+        // 좋아요된 게시글 id 목록 조회
+        List<Long> postIds = posts.stream()
+                .map(Post::getId)
+                .toList();
+
+        List<Long> likeIds = queryFactory.select(postLike.postId)
+                .from(postLike)
+                .where(
+                        postLike.userId.eq(userId),
+                        postLike.postId.in(postIds)
+                )
+                .fetch();
+
+        // DTO 매핑
         List<PostDetail> result = posts.stream()
                 .map(p -> PostDetail.of(p, likeIds))
                 .toList();
 
         return new PageImpl<>(result, pageable, total != null ? total : 0);
     }
-
 
 
 }

@@ -3,6 +3,8 @@ package com.otatime_server.post.repository;
 import static com.otatime_server.like.domain.QPostLike.*;
 import static com.otatime_server.post.domain.QPost.*;
 
+import com.otatime_server.post.domain.Category;
+import com.otatime_server.post.domain.EventType;
 import com.otatime_server.post.domain.Post;
 import com.otatime_server.post.domain.Region;
 import com.otatime_server.post.dto.PostDetail;
@@ -26,9 +28,16 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     @Override
-    public Page<PostDetail> getMainPosts(Pageable pageable, LocalDate startDate, LocalDate endDate, Region region, Long userId) {
-
-        // 좋아요 ID 목록 (userId가 있을 때만)
+    public Page<PostDetail> getMainPosts(
+            Pageable pageable,
+            LocalDate startDate,
+            LocalDate endDate,
+            Region region,
+            Long userId,
+            List<Category> categories,
+            List<EventType> eventTypes
+    ) {
+        // 좋아요 ID 목록
         List<Long> likeIds = (userId != null) ?
                 queryFactory.select(postLike.postId)
                         .from(postLike)
@@ -36,17 +45,26 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         .fetch()
                 : Collections.emptyList();
 
-        // 조건 모듈화
+        // 동적 조건
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(post.startDate.after(startDate));
+
+        if (startDate != null) {
+            builder.and(post.startDate.goe(startDate));
+        }
         if (endDate != null) {
-            builder.and(post.startDate.before(endDate.plusDays(1))); // endDate 포함 검색
+            builder.and(post.startDate.loe(endDate));
         }
         if (region != null) {
             builder.and(post.region.eq(region));
         }
+        if (categories != null && !categories.isEmpty()) {
+            builder.and(post.category.in(categories));
+        }
+        if (eventTypes != null && !eventTypes.isEmpty()) {
+            builder.and(post.eventType.in(eventTypes));
+        }
 
-        // 전체 개수 조회 (카운트 쿼리)
+        // 전체 개수
         Long total = queryFactory.select(post.count())
                 .from(post)
                 .where(builder)
@@ -59,7 +77,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         // 실제 데이터 조회
         List<Post> posts = queryFactory.selectFrom(post)
                 .where(builder)
-                .orderBy(post.startDate.asc(), post.id.asc()) // 날짜 + id 정렬
+                .orderBy(post.startDate.asc(), post.id.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

@@ -80,9 +80,18 @@ public class PostService {
         return new PostResponse(post.getId());
     }
 
-    public Page<PostDetail> getMainPage(Pageable pageable, String startDate, String endDate, String region, String email) {
+    public Page<PostDetail> getMainPage(Pageable pageable, String startDate, String endDate, String region, String email, List<Category> categories, List<EventType> eventTypes) {
         User user = getUser(email);
-        return postRepository.getMainPosts(pageable, toLocalDate(startDate), toLocalDate(endDate), Region.getRegionByValue(region), user.getId());
+
+        return postRepository.getMainPosts(
+                pageable,
+                toLocalDate(startDate),
+                toLocalDate(endDate),
+                Region.getRegionByValue(region),
+                user.getId(),
+                categories,
+                eventTypes
+        );
     }
 
     public Page<PostDetail> getDatePage(Pageable pageable, String startDate, String email) {

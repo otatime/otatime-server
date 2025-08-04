@@ -1,8 +1,10 @@
 package com.otatime_server.post.domain;
 
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
-@Getter
+import java.util.Arrays;
+
 public enum EventType {
     COLLABO_CAFE("콜라보 카페"),
     POPUP_STORE("팝업스토어"),
@@ -14,4 +16,16 @@ public enum EventType {
         this.value = value;
     }
 
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @JsonCreator
+    public static EventType fromValue(String value) {
+        return Arrays.stream(EventType.values())
+                .filter(e -> e.value.equals(value))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 이벤트 유형 값: " + value));
+    }
 }

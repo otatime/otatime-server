@@ -2,11 +2,14 @@ package com.otatime_server.post.controller;
 
 import com.otatime_server.global.dto.CommonResponse;
 import com.otatime_server.global.dto.PageInfo;
+import com.otatime_server.post.dto.DailyPostsRequest;
+import com.otatime_server.post.dto.MonthlyPostsRequest;
 import com.otatime_server.post.dto.PostDetail;
 import com.otatime_server.post.dto.PostListResponse;
 import com.otatime_server.post.dto.PostResponse;
 import com.otatime_server.post.dto.PostSearchRequest;
 import com.otatime_server.post.dto.ReportRequest;
+import com.otatime_server.post.dto.SearchPostsRequest;
 import com.otatime_server.post.service.PostService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +23,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -30,11 +32,6 @@ public class PostController {
 
     private final PostService postService;
 
-    // 전체적으로 null 관련 처리 되어 있는지 확인
-    // 특히 Querydsl 에서 확인
-    // 테스트케이스 작성 및 포스트맨 테스트
-
-    // 제약 사항 정리
     @PostMapping("/reports")
     public CommonResponse<PostResponse> report(@RequestBody ReportRequest reportRequest) {
         return new CommonResponse<>(postService.report(getLoginUserEmail(), reportRequest));
@@ -45,7 +42,6 @@ public class PostController {
         return new CommonResponse<>(postService.likePost(getLoginUserEmail(), postId));
     }
 
-    // 각각 제약사항 check 메서드
     @GetMapping
     public CommonResponse<PostListResponse> getPosts(
             Pageable pageable,
@@ -72,26 +68,24 @@ public class PostController {
         return new CommonResponse<>(postService.getPostDetail(postId, getLoginUserEmail()));
     }
 
-    // 각각 제약사항 check 메서드
     @GetMapping("/date")
     public CommonResponse<PostListResponse> getDailyPosts(
             Pageable pageable,
-            @RequestParam String date
+            @Validated DailyPostsRequest request
     ) {
-        Page<PostDetail> datePage = postService.getDatePage(pageable, date, getLoginUserEmail());
+        Page<PostDetail> datePage = postService.getDatePage(pageable, request.date(), getLoginUserEmail());
         return new CommonResponse<>(new PostListResponse(
                 datePage.getContent(),
                 PageInfo.of(datePage)
         ));
     }
 
-    // 각각 제약사항 check 메서드
     @GetMapping("/month")
     public CommonResponse<PostListResponse> getMonthlyPosts(
             Pageable pageable,
-            @RequestParam String month
+            @Validated MonthlyPostsRequest request
     ) {
-        Page<PostDetail> page = postService.getMonthPage(pageable, month, getLoginUserEmail());
+        Page<PostDetail> page = postService.getMonthPage(pageable, request.month(), getLoginUserEmail());
         return new CommonResponse<>(new PostListResponse(
                 page.getContent(),
                 PageInfo.of(page)
@@ -107,13 +101,12 @@ public class PostController {
         ));
     }
 
-    // 각각 제약사항 check 메서드
     @GetMapping("/search")
     public CommonResponse<PostListResponse> getSearchPosts(
             Pageable pageable,
-            @RequestParam String keyword
+            @Validated SearchPostsRequest request
     ) {
-        Page<PostDetail> search = postService.search(keyword, pageable, getLoginUserEmail());
+        Page<PostDetail> search = postService.search(request.keyword(), pageable, getLoginUserEmail());
         return new CommonResponse<>(new PostListResponse(
                 search.getContent(),
                 PageInfo.of(search)

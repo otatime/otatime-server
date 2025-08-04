@@ -19,6 +19,7 @@ import com.otatime_server.user.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -118,13 +119,21 @@ public class PostService {
     }
 
     public LocalDate getFirstDayOfMonth(String yearMonthStr) {
-        YearMonth ym = YearMonth.parse(yearMonthStr, YEAR_MONTH_FORMATTER);
-        return ym.atDay(1);
+        try {
+            YearMonth ym = YearMonth.parse(yearMonthStr, YEAR_MONTH_FORMATTER);
+            return ym.atDay(1);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("잘못된 월 형식입니다: " + yearMonthStr);
+        }
     }
 
     public LocalDate getLastDayOfMonth(String yearMonthStr) {
-        YearMonth ym = YearMonth.parse(yearMonthStr, YEAR_MONTH_FORMATTER);
-        return ym.atEndOfMonth();
+        try {
+            YearMonth ym = YearMonth.parse(yearMonthStr, YEAR_MONTH_FORMATTER);
+            return ym.atEndOfMonth();
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("잘못된 월 형식입니다: " + yearMonthStr);
+        }
     }
 
     public PostDetail getPostDetail(Long postId, String email) {
@@ -144,6 +153,10 @@ public class PostService {
     }
 
     private LocalDate toLocalDate(String dateString) {
-        return LocalDate.parse(dateString);
+        try {
+            return LocalDate.parse(dateString);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("잘못된 날짜 형식입니다: " + dateString);
+        }
     }
 }

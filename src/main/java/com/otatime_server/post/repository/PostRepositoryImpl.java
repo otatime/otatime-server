@@ -9,10 +9,8 @@ import com.otatime_server.post.domain.Post;
 import com.otatime_server.post.domain.Region;
 import com.otatime_server.post.dto.PostDetail;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -25,9 +23,11 @@ import org.springframework.stereotype.Repository;
 public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final EntityManager entityManager;
 
-    public PostRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
+    public PostRepositoryImpl(JPAQueryFactory jpaQueryFactory, EntityManager entityManager) {
         this.queryFactory = jpaQueryFactory;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -180,37 +180,42 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     public Page<PostDetail> searchPosts(Pageable pageable, String query, Long userId) {
         LocalDate today = LocalDate.now();
 
-        // Full-Text 조건
-        BooleanExpression fullTextCondition = Expressions.booleanTemplate(
-                "MATCH({0}, {1}) AGAINST({2} IN BOOLEAN MODE)",
-                post.title, post.details, "+" + query + "*"
-        );
+        // 1. Native Query - 게시글 목록 조회
+        String sql = """
+        SELECT * FROM post
+        WHERE start_date >= :today
+          AND MATCH(title, details) AGAINST(:query IN BOOLEAN MODE)
+        ORDER BY start_date, post_id
+        LIMIT :limit OFFSET :offset
+    """;
 
-        // 게시글 목록 조회
-        List<Post> posts = queryFactory.selectFrom(post)
-                .where(
-                        post.startDate.goe(today),
-                        fullTextCondition
-                )
-                .orderBy(post.startDate.asc(), post.id.asc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+        List<Post> posts = entityManager.createNativeQuery(sql, Post.class)
+                .setParameter("today", today)
+                .setParameter("query", "+" + query + "*")
+                .setParameter("limit", pageable.getPageSize())
+                .setParameter("offset", pageable.getOffset())
+                .getResultList();
 
         if (posts.isEmpty()) {
             return new PageImpl<>(Collections.emptyList(), pageable, 0);
         }
 
-        // 총 개수 조회
-        Long total = queryFactory.select(post.count())
-                .from(post)
-                .where(
-                        post.startDate.goe(today),
-                        fullTextCondition
-                )
-                .fetchOne();
+        // 2. Native Query - 총 개수 조회
+        String countSql = """
+        SELECT COUNT(*)
+        FROM post
+        WHERE start_date >= :today
+          AND MATCH(title, details) AGAINST(:query IN BOOLEAN MODE)
+    """;
 
-        // 좋아요된 게시글 id 목록 조회
+        Number totalCount = (Number) entityManager.createNativeQuery(countSql)
+                .setParameter("today", today)
+                .setParameter("query", "+" + query + "*")
+                .getSingleResult();
+
+        long total = totalCount.longValue();
+
+        // 3. 좋아요된 게시글 id 목록 조회
         List<Long> postIds = posts.stream()
                 .map(Post::getId)
                 .toList();
@@ -223,12 +228,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 )
                 .fetch();
 
-        // DTO 매핑
+        // 4. DTO 매핑
         List<PostDetail> result = posts.stream()
                 .map(p -> PostDetail.of(p, likeIds))
                 .toList();
 
-        return new PageImpl<>(result, pageable, total != null ? total : 0);
+        return new PageImpl<>(result, pageable, total);
     }
 
 

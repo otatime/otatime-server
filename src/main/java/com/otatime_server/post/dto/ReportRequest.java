@@ -33,7 +33,7 @@ public record ReportRequest(
 
         @NotBlank(message = "이벤트 유형은 필수 입력값입니다.")
         @Size(max = 50, message = "이벤트 유형은 최대 {max}자까지 가능합니다.")
-        String EventType,
+        String eventType,
 
         @NotBlank(message = "지역은 필수 입력값입니다.")
         @Size(max = 50, message = "지역은 최대 {max}자까지 가능합니다.")

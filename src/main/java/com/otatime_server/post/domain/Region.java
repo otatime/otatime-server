@@ -30,6 +30,9 @@ public enum Region {
     }
 
     public static Region getRegionByValue(String value) {
+        if (value == null) {
+            return null;
+        }
         return Arrays.stream(Region.values())
                 .filter(it -> it.value.equals(value))
                 .findFirst()

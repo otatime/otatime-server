@@ -23,6 +23,9 @@ public enum EventType {
 
     @JsonCreator
     public static EventType fromValue(String value) {
+        if (value == null) {
+            return null;
+        }
         return Arrays.stream(EventType.values())
                 .filter(e -> e.value.equals(value))
                 .findFirst()

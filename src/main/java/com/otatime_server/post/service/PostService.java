@@ -43,28 +43,38 @@ public class PostService {
     @Transactional
     public PostResponse report(String email, ReportRequest reportRequest) {
         User user = getUser(email);
+
+        Region region = Region.getRegionByValue(reportRequest.region());
+        Category category = Category.fromValue(reportRequest.category());
+        EventType eventType = EventType.fromValue(reportRequest.eventType());
+
+        LocalDate startDate = LocalDate.parse(reportRequest.startDate());
+        LocalDate endDate = LocalDate.parse(reportRequest.endDate());
+
         Post post = new Post(
                 reportRequest.title(),
                 reportRequest.summary(),
                 reportRequest.details(),
-                LocalDate.now(),
-                LocalDate.now(),
+                startDate,
+                endDate,
                 reportRequest.location(),
                 reportRequest.imageUrl(),
-                Region.SEOUL,
-                EventStatus.SCHEDULED,
-                Category.ANIMATION,
-                EventType.COLLABO_CAFE,
-                PostStatus.PENDING
+                region,
+                EventStatus.SCHEDULED,   // 제보 시 기본값
+                category,
+                eventType,
+                PostStatus.PUBLISHED       // 제보 시 기본값
         );
 
         Post savedPost = postRepository.save(post);
 
+        // 제보 히스토리 기록
         reportHistoryRepository.save(new ReportHistory(user.getId(), savedPost.getId()));
         user.adopt();
 
         return new PostResponse(savedPost.getId());
     }
+
 
     @Transactional
     public PostResponse likePost(String email, Long postId) {
@@ -153,6 +163,9 @@ public class PostService {
     }
 
     private LocalDate toLocalDate(String dateString) {
+        if (dateString == null) {
+            return null;
+        }
         try {
             return LocalDate.parse(dateString);
         } catch (DateTimeParseException e) {

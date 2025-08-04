@@ -23,8 +23,11 @@ public enum Category {
 
     @JsonCreator
     public static Category fromValue(String value) {
+        if (value == null) {
+            return null;
+        }
         return Arrays.stream(Category.values())
-                .filter(c -> c.value.equals(value))
+                .filter(c -> c.getValue().equals(value))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 카테고리 값: " + value));
     }

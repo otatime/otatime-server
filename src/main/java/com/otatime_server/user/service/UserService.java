@@ -63,4 +63,14 @@ public class UserService {
         return userRepository.findByEmail(userEmail).orElseThrow(() -> new IllegalArgumentException("해당 유저 없음"));
     }
 
+    public Page<User> getUserInfo() {
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("id").descending());
+        return userRepository.findAll(pageRequest);
+    }
+
+    @Transactional
+    public Long deleteUser(Long userId) {
+        userRepository.deleteById(userId);
+        return userId;
+    }
 }

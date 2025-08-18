@@ -68,10 +68,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         }
 
         // 전체 개수
-        Long total = queryFactory.select(post.count())
-                .from(post)
-                .where(builder)
-                .fetchOne();
+        Long total = getSize(builder);
 
         if (total == null || total == 0) {
             return new PageImpl<>(Collections.emptyList(), pageable, 0);
@@ -109,10 +106,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         builder.and(post.startDate.eq(date));
 
         // 전체 개수 조회
-        Long total = queryFactory.select(post.count())
-                .from(post)
-                .where(builder)
-                .fetchOne();
+        Long total = getSize(builder);
 
         if (total == null || total == 0) {
             return new PageImpl<>(Collections.emptyList(), pageable, 0);
@@ -151,10 +145,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .and(post.startDate.loe(lastDay));
 
         // 전체 개수 조회
-        Long total = queryFactory.select(post.count())
-                .from(post)
-                .where(builder)
-                .fetchOne();
+        Long total = getSize(builder);
 
         if (total == null || total == 0) {
             return new PageImpl<>(Collections.emptyList(), pageable, 0);
@@ -236,5 +227,10 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return new PageImpl<>(result, pageable, total);
     }
 
-
+    private Long getSize(BooleanBuilder builder) {
+        return queryFactory.select(post.count())
+                .from(post)
+                .where(builder)
+                .fetchOne();
+    }
 }

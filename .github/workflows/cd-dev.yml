@@ -87,6 +87,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_PEM_KEY }}
           script: |
+            echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/otatime-server:${{ steps.short_sha.outputs.sha_short }}
             docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/otatime-server:${{ steps.short_sha.outputs.sha_short }} otatime-server
             docker rm -f otatime-server || true

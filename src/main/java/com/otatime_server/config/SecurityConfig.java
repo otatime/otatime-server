@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer<HttpSecurity>::disable)
                 .formLogin(FormLoginConfigurer<HttpSecurity>::disable)
                 .httpBasic(HttpBasicConfigurer<HttpSecurity>::disable)
-                .sessionManagement (it ->
+                .sessionManagement(it ->
                         it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .exceptionHandling(it ->
@@ -46,12 +46,12 @@ public class SecurityConfig {
                                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                                 .accessDeniedHandler(jwtAccessDeniedHandler)
                 )
-                .authorizeHttpRequests(
-                        authorize -> authorize
-                                .requestMatchers("/**").permitAll()
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 

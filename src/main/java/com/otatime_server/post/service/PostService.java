@@ -10,7 +10,9 @@ import com.otatime_server.post.domain.PostStatus;
 import com.otatime_server.post.domain.Region;
 import com.otatime_server.post.domain.ReportHistory;
 import com.otatime_server.post.dto.PostDetail;
+import com.otatime_server.post.dto.PostRequest;
 import com.otatime_server.post.dto.PostResponse;
+import com.otatime_server.post.dto.PostUpdateRequest;
 import com.otatime_server.post.dto.ReportRequest;
 import com.otatime_server.post.repository.PostRepository;
 import com.otatime_server.post.repository.ReportHistoryRepository;
@@ -24,7 +26,9 @@ import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -148,10 +152,18 @@ public class PostService {
 
     public PostDetail getPostDetail(Long postId, String email) {
         Post post = getPost(postId);
-        User user = getUser(email);
-        List<Long> postIdByUserId = postLikeRepository.findPostIdByUserId(user.getId());
-
+        List<Long> postIdByUserId = getLikeList(email);
         return PostDetail.of(post, postIdByUserId);
+    }
+
+    private List<Long> getLikeList(String email) {
+        User user;
+        try {
+            user = getUser(email);
+        } catch (IllegalArgumentException e) {
+            return Collections.emptyList();
+        }
+        return postLikeRepository.findPostIdByUserId(user.getId());
     }
 
     private User getUser(String userEmail) {
@@ -171,5 +183,59 @@ public class PostService {
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("잘못된 날짜 형식입니다: " + dateString);
         }
+    }
+
+    public Page<Post> getPostList(PostStatus postStatus) {
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("id").descending());
+        return postRepository.findAllByStatus(pageRequest, postStatus);
+    }
+
+    @Transactional
+    public Long deletePost(Long postId) {
+        postRepository.deleteById(postId);
+        return postId;
+    }
+
+    public Long updateToPost(Long postId) {
+        postRepository.updatePostStatus(postId);
+        return postId;
+    }
+
+    @Transactional
+    public PostResponse post(String email, PostRequest postRequest) {
+        User user = getUser(email);
+
+        Region region = Region.getRegionByValue(postRequest.region());
+        Category category = Category.fromValue(postRequest.category());
+        EventType eventType = EventType.fromValue(postRequest.eventType());
+
+        LocalDate startDate = LocalDate.parse(postRequest.startDate());
+        LocalDate endDate = LocalDate.parse(postRequest.endDate());
+
+        Post post = new Post(
+                postRequest.title(),
+                postRequest.summary(),
+                postRequest.details(),
+                startDate,
+                endDate,
+                postRequest.location(),
+                postRequest.imageUrl(),
+                region,
+                EventStatus.SCHEDULED,   // 제보 시 기본값
+                category,
+                eventType,
+                PostStatus.PUBLISHED       // 제보 시 기본값
+        );
+
+        Post savedPost = postRepository.save(post);
+
+        return new PostResponse(savedPost.getId());
+    }
+
+    @Transactional
+    public PostResponse updatePost(Long postId, PostUpdateRequest postUpdateRequest) {
+        Post post = getPost(postId);
+        Long updatedId = post.update(postUpdateRequest);
+        return new PostResponse(updatedId);
     }
 }

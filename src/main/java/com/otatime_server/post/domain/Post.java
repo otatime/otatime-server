@@ -1,5 +1,6 @@
 package com.otatime_server.post.domain;
 
+import com.otatime_server.post.dto.PostUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -58,5 +59,15 @@ public class Post {
         this.category = category;
         this.eventType = eventType;
         this.postStatus = postStatus;
+    }
+
+    public Long update(PostUpdateRequest postUpdateRequest) {
+
+        this.title = postUpdateRequest.title();
+        this.summary = postUpdateRequest.summary();
+        this.details = postUpdateRequest.details();
+//        this.category;
+        
+        return this.id;
     }
 }

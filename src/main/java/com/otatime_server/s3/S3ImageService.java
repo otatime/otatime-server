@@ -1,25 +1,22 @@
 package com.otatime_server.s3;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.util.IOUtils;
 import com.otatime_server.s3.dto.UploadResponse;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.core.sync.RequestBody;
+
+import java.io.IOException;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class S3ImageService {
 
-    private final AmazonS3Client amazonS3Client;
+    private final S3Client s3Client;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -36,27 +33,46 @@ public class S3ImageService {
         validateExtension(fileName);
 
         String createFileName = createFileName(fileName);
-        ObjectMetadata objMeta = new ObjectMetadata();
-        byte[] bytes = IOUtils.toByteArray(file.getInputStream());
-        objMeta.setContentLength(bytes.length);
-        ByteArrayInputStream byteArrayIs = new ByteArrayInputStream(bytes);
 
-        amazonS3Client.putObject(
-                new PutObjectRequest(bucket, createFileName, byteArrayIs, objMeta)
-                        .withCannedAcl(CannedAccessControlList.PublicRead)
+        // 업로드 요청 생성
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(createFileName)
+                .acl(ObjectCannedACL.PUBLIC_READ) // 공개 읽기 권한
+                .contentType(file.getContentType())
+                .build();
+
+        // 실제 업로드
+        s3Client.putObject(
+                putObjectRequest,
+                RequestBody.fromBytes(file.getBytes())
         );
-        return new UploadResponse(
-                amazonS3Client.getUrl(bucket, createFileName).toString()
-        );
+
+        // URL 생성
+        String fileUrl = s3Client.utilities().getUrl(
+                GetUrlRequest.builder()
+                        .bucket(bucket)
+                        .key(createFileName)
+                        .build()
+        ).toString();
+
+        return new UploadResponse(fileUrl);
     }
 
     public void delete(String fileUrl) {
+        // fileUrl에서 objectKey 추출
         String objectKey = fileUrl.split(bucket + ".s3." + region + ".amazonaws.com/")[1];
-        amazonS3Client.deleteObject(new DeleteObjectRequest(bucket, objectKey));
+
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(objectKey)
+                .build();
+
+        s3Client.deleteObject(deleteObjectRequest);
     }
 
     private String createFileName(String fileName) {
-        return "image/" + UUID.randomUUID() + fileName;
+        return "image/" + UUID.randomUUID() + "_" + fileName;
     }
 
     private void validateExtension(String fileName) {

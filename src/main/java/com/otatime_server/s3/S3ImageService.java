@@ -38,7 +38,6 @@ public class S3ImageService {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(createFileName)
-                .acl(ObjectCannedACL.PUBLIC_READ) // 공개 읽기 권한
                 .contentType(file.getContentType())
                 .build();
 

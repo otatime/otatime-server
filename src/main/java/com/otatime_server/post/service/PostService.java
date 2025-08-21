@@ -2,6 +2,7 @@ package com.otatime_server.post.service;
 
 import com.otatime_server.like.domain.PostLike;
 import com.otatime_server.like.repository.PostLikeRepository;
+import com.otatime_server.post.domain.Address;
 import com.otatime_server.post.domain.Category;
 import com.otatime_server.post.domain.EventStatus;
 import com.otatime_server.post.domain.EventType;
@@ -14,6 +15,7 @@ import com.otatime_server.post.dto.PostRequest;
 import com.otatime_server.post.dto.PostResponse;
 import com.otatime_server.post.dto.PostUpdateRequest;
 import com.otatime_server.post.dto.ReportRequest;
+import com.otatime_server.post.repository.AddressRepository;
 import com.otatime_server.post.repository.PostRepository;
 import com.otatime_server.post.repository.ReportHistoryRepository;
 import com.otatime_server.user.domain.User;
@@ -41,6 +43,7 @@ public class PostService {
     private final ReportHistoryRepository reportHistoryRepository;
     private final UserRepository userRepository;
     private final PostLikeRepository postLikeRepository;
+    private final AddressRepository addressRepository;
 
     private static final DateTimeFormatter YEAR_MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
 
@@ -55,19 +58,29 @@ public class PostService {
         LocalDate startDate = LocalDate.parse(reportRequest.startDate());
         LocalDate endDate = LocalDate.parse(reportRequest.endDate());
 
+        Address address = new Address(
+                reportRequest.zipCode(),
+                reportRequest.street(),
+                reportRequest.detailsAddress(),
+                reportRequest.latitude(),
+                reportRequest.longitude()
+        );
+
+        Address savedAddress = addressRepository.save(address);
+
         Post post = new Post(
                 reportRequest.title(),
                 reportRequest.summary(),
                 reportRequest.details(),
                 startDate,
                 endDate,
-                reportRequest.location(),
                 reportRequest.imageUrl(),
                 region,
-                EventStatus.SCHEDULED,   // 제보 시 기본값
+                EventStatus.SCHEDULED,
                 category,
                 eventType,
-                PostStatus.PUBLISHED       // 제보 시 기본값
+                PostStatus.PUBLISHED,
+                savedAddress
         );
 
         Post savedPost = postRepository.save(post);
@@ -212,19 +225,29 @@ public class PostService {
         LocalDate startDate = LocalDate.parse(postRequest.startDate());
         LocalDate endDate = LocalDate.parse(postRequest.endDate());
 
+        Address address = new Address(
+                postRequest.zipCode(),
+                postRequest.street(),
+                postRequest.detailsAddress(),
+                postRequest.latitude(),
+                postRequest.longitude()
+        );
+
+        Address savedAddress = addressRepository.save(address);
+
         Post post = new Post(
                 postRequest.title(),
                 postRequest.summary(),
                 postRequest.details(),
                 startDate,
                 endDate,
-                postRequest.location(),
                 postRequest.imageUrl(),
                 region,
-                EventStatus.SCHEDULED,   // 제보 시 기본값
+                EventStatus.SCHEDULED,
                 category,
                 eventType,
-                PostStatus.PUBLISHED       // 제보 시 기본값
+                PostStatus.PUBLISHED,
+                savedAddress
         );
 
         Post savedPost = postRepository.save(post);

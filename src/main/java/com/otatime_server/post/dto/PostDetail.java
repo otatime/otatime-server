@@ -31,7 +31,7 @@ public record PostDetail(
                 post.getCategory().toString(),
                 post.getEventType().getValue(),
                 post.getRegion().toString(),
-                post.getLocation(),
+                post.getAddress().getStreet(),
                 likeIds.contains(post.getId()),
                 dday(post.getStartDate())
         );

@@ -1,6 +1,7 @@
 package com.otatime_server.post.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.URL;
@@ -41,8 +42,19 @@ public record PostRequest(
         @Size(max = 50, message = "지역은 최대 {max}자까지 가능합니다.")
         String region,
 
-        @NotBlank(message = "위치는 필수 입력값입니다.")
-        @Size(max = 255, message = "위치는 최대 {max}자까지 가능합니다.")
-        String location
+        @NotBlank(message = "우편번호는 필수 입력값입니다.")
+        @Size(max = 10, message = "우편번호는 최대 {max}자까지 가능합니다.")
+        String zipCode,
+
+        @NotBlank(message = "도로명 주소는 필수 입력값입니다.")
+        String street,
+
+        String detailsAddress,
+
+        @NotNull(message = "위도는 필수 입력값입니다.")
+        Double latitude,
+
+        @NotNull(message = "경도는 필수 입력값입니다.")
+        Double longitude
 ) {
 }

@@ -91,4 +91,4 @@ jobs:
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/otatime-server:${{ steps.short_sha.outputs.sha_short }}
             docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/otatime-server:${{ steps.short_sha.outputs.sha_short }} otatime-server
             docker rm -f otatime-server || true
-            docker run -d --name otatime-server -e TZ=Asia/Seoul -e SPRING_PROFILES_ACTIVE=ec2-dev -p 8081:8081 ${{ secrets.DOCKER_HUB_USERNAME }}/otatime-server:${{ steps.short_sha.outputs.sha_short }}
+            docker run -d --name otatime-server -e TZ=Asia/Seoul -e SPRING_PROFILES_ACTIVE=ec2-dev -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/otatime-server:${{ steps.short_sha.outputs.sha_short }}

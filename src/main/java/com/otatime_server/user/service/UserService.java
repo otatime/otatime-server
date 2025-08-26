@@ -25,7 +25,7 @@ public class UserService {
 
     public MyPageResponse getMyPage(String userEmail) {
         User user = getUser(userEmail);
-        return new MyPageResponse(user.getId(), user.getUsername(), user.getProfileImageUrl(), user.getAdoptionCount());
+        return new MyPageResponse(user.getId(), user.getEmail(), user.getUsername(), user.getProfileImageUrl(), user.getAdoptionCount());
     }
 
     @Transactional

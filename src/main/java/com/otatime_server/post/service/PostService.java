@@ -111,12 +111,14 @@ public class PostService {
     public Page<PostDetail> getMainPage(Pageable pageable, String startDate, String endDate, String region, String email, List<Category> categories, List<EventType> eventTypes) {
         User user = getUser(email);
 
+        Long userId = user == null ? null : user.getId();
+
         return postRepository.getMainPosts(
                 pageable,
                 toLocalDate(startDate),
                 toLocalDate(endDate),
                 Region.getRegionByValue(region),
-                user.getId(),
+                userId,
                 categories,
                 eventTypes
         );
@@ -124,12 +126,14 @@ public class PostService {
 
     public Page<PostDetail> getDatePage(Pageable pageable, String startDate, String email) {
         User user = getUser(email);
-        return postRepository.getDailyPosts(pageable, toLocalDate(startDate), user.getId());
+        Long userId = user == null ? null : user.getId();
+        return postRepository.getDailyPosts(pageable, toLocalDate(startDate), userId);
     }
 
     public Page<PostDetail> getMonthPage(Pageable pageable, String month, String email) {
         User user = getUser(email);
-        return postRepository.getMonthlyPosts(pageable, getFirstDayOfMonth(month), getLastDayOfMonth(month), user.getId());
+        Long userId = user == null ? null : user.getId();
+        return postRepository.getMonthlyPosts(pageable, getFirstDayOfMonth(month), getLastDayOfMonth(month), userId);
     }
 
     public List<PostDetail> getBanner() {
@@ -141,8 +145,8 @@ public class PostService {
     public Page<PostDetail> search(String query, Pageable pageable, String email) {
 
         User user = getUser(email);
-
-        return postRepository.searchPosts(pageable, query, user.getId());
+        Long userId = user == null ? null : user.getId();
+        return postRepository.searchPosts(pageable, query, userId);
     }
 
     public LocalDate getFirstDayOfMonth(String yearMonthStr) {
@@ -170,16 +174,17 @@ public class PostService {
     }
 
     private List<Long> getLikeList(String email) {
-        User user;
-        try {
-            user = getUser(email);
-        } catch (IllegalArgumentException e) {
+        User user =  getUser(email);
+        if (user == null) {
             return Collections.emptyList();
         }
         return postLikeRepository.findPostIdByUserId(user.getId());
     }
 
     private User getUser(String userEmail) {
+        if (userEmail.equals("anonymousUser")) {
+            return null;
+        }
         return userRepository.findByEmail(userEmail).orElseThrow(() -> new IllegalArgumentException("해당 유저 없음"));
     }
 

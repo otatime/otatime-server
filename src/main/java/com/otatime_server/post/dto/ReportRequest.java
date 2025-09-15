@@ -8,10 +8,6 @@ public record ReportRequest(
         @Size(min = 1, max = 100, message = "제목은 {min}자 이상 {max}자 이하여야 합니다.")
         String title,
 
-        @NotBlank(message = "요약은 필수 입력값입니다.")
-        @Size(min = 1, max = 300, message = "요약은 {min}자 이상 {max}자 이하여야 합니다.")
-        String summary,
-
         @NotBlank(message = "상세 내용은 필수 입력값입니다.")
         @Size(min = 1, max = 2000, message = "상세 내용은 {min}자 이상 {max}자 이하여야 합니다.")
         String details,

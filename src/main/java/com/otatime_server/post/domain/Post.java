@@ -27,7 +27,6 @@ public class Post {
     private Long id;
 
     private String title;
-    private String summary;
     private String details;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -52,10 +51,9 @@ public class Post {
     @JoinColumn(name = "address_id")
     private Address address;
 
-    public Post(String title, String summary, String details, LocalDate startDate, LocalDate endDate, String imageUrl,
+    public Post(String title, String details, LocalDate startDate, LocalDate endDate, String imageUrl,
                 Region region, EventStatus eventStatus, Category category, EventType eventType, PostStatus postStatus, Address address) {
         this.title = title;
-        this.summary = summary;
         this.details = details;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -70,12 +68,8 @@ public class Post {
     }
 
     public Long update(PostUpdateRequest postUpdateRequest) {
-
         this.title = postUpdateRequest.title();
-        this.summary = postUpdateRequest.summary();
         this.details = postUpdateRequest.details();
-//        this.category;
-        
         return this.id;
     }
 }

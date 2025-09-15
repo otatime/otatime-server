@@ -8,7 +8,6 @@ import java.util.List;
 public record PostDetail(
         Long postId,
         String title,
-        String summary,
         String imageUrl,
         String startDate,
         String endDate,
@@ -24,7 +23,6 @@ public record PostDetail(
         return new PostDetail(
                 post.getId(),
                 post.getTitle(),
-                post.getSummary(),
                 post.getImageUrl(),
                 post.getStartDate().toString(),
                 post.getEndDate().toString(),

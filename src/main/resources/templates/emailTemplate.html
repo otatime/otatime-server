@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입 인증 이메일</title>
+</head>
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; padding: 30px 10px; margin: 0;">
+<div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px 20px; border-radius: 12px; text-align: center; border: 1px solid #eaeaea;">
+    <!-- 제목 -->
+    <h2 style="font-size: 26px; color: #222222; margin-bottom: 15px;">
+        안녕하세요, <span style="color:#007bff;" th:text="${mail}"></span>님!
+    </h2>
+
+    <!-- 안내 문구 -->
+    <p style="font-size: 18px; color: #555555; margin-bottom: 30px; line-height: 1.5;">
+        회원가입을 완료하기 위해<br><strong>아래 인증 코드를</strong> 입력해 주세요.
+    </p>
+
+    <!-- 인증 코드 박스 -->
+    <div style="
+            display:inline-block;
+            background:#007bff;
+            color:#ffffff;
+            font-size:40px;
+            font-weight:600;
+            letter-spacing:6px;
+            padding:15px 35px;
+            border-radius:10px;
+            margin-bottom:30px;
+            font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+        ">
+        <span th:text="${certCode}"></span>
+    </div>
+
+    <!-- 안내 문구 -->
+    <p style="font-size: 14px; color: #888888; margin-top: 20px; line-height: 1.4;">
+        본 메일은 자동 발송 메일입니다.<br>인증 코드는 10분간 유효합니다.
+    </p>
+
+    <!-- 푸터 -->
+    <div style="font-size: 14px; color: #aaaaaa; margin-top: 20px; border-top: 1px solid #eaeaea; padding-top: 15px;">
+        &copy; 2025 Otatime. All rights reserved.
+    </div>
+</div>
+</body>
+</html>

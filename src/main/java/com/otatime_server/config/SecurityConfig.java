@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/join").permitAll()
                         .requestMatchers("/posts/**").permitAll()
                         .requestMatchers("/posts").permitAll()
-                        .requestMatchers("/login").permitAll()
+                        .requestMatchers("/email").permitAll()
                         .requestMatchers("/login").permitAll()
                         .anyRequest().authenticated()
                 )

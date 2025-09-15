@@ -70,7 +70,6 @@ public class PostService {
 
         Post post = new Post(
                 reportRequest.title(),
-                reportRequest.summary(),
                 reportRequest.details(),
                 startDate,
                 endDate,
@@ -79,7 +78,7 @@ public class PostService {
                 EventStatus.SCHEDULED,
                 category,
                 eventType,
-                PostStatus.PUBLISHED,
+                PostStatus.PENDING,
                 savedAddress
         );
 
@@ -242,7 +241,6 @@ public class PostService {
 
         Post post = new Post(
                 postRequest.title(),
-                postRequest.summary(),
                 postRequest.details(),
                 startDate,
                 endDate,

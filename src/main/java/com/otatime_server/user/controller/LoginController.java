@@ -4,6 +4,7 @@ import com.otatime_server.auth.service.JwtService;
 import com.otatime_server.global.dto.CommonResponse;
 import com.otatime_server.global.dto.EmptyDto;
 import com.otatime_server.global.dto.TokenResponse;
+import com.otatime_server.mail.service.MailService;
 import com.otatime_server.user.dto.EmailVo;
 import com.otatime_server.user.dto.JoinRequest;
 import com.otatime_server.user.dto.LoginRequest;
@@ -21,9 +22,17 @@ public class LoginController {
 
     private final UserLoginService userLoginService;
     private final JwtService jwtService;
+    private final MailService mailService;
+
+    @PostMapping("/email")
+    public CommonResponse<EmptyDto> sendEmail(@RequestBody EmailVo emailVo) {
+        mailService.sendCertMail(emailVo.email());
+        return CommonResponse.EMPTY;
+    }
 
     @PostMapping("/join")
     public CommonResponse<UserResponse> join(@RequestBody JoinRequest joinRequest) {
+        mailService.checkCertCode(joinRequest.email(), joinRequest.certCode());
         return new CommonResponse<>(userLoginService.join(joinRequest));
     }
 

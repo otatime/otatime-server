@@ -2,6 +2,7 @@ package com.otatime_server.mail.service;
 
 import static com.otatime_server.mail.MailConst.MAIL_SUCCESS;
 
+import com.otatime_server.mail.dto.CertRequest;
 import com.otatime_server.mail.repository.MailRedisRepository;
 import com.otatime_server.mail.util.MailUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,24 +17,18 @@ public class MailService {
     private final MailUtil mailUtil;
     private final MailRedisRepository mailRedisRepository;
 
-    public Boolean sendCertMail(String email) {
+    public void sendCertMail(String email) {
         mailUtil.sendMail(email).thenAccept(certCord -> {
             mailRedisRepository.saveEmailCertCode(email, certCord);
             log.info("{} {}", MAIL_SUCCESS, email);
         });
-        return true;
     }
 
-    public Boolean checkCertCode(String email, String certCode) {
-        String savedCertCode = mailRedisRepository.findCertCodeByEmail(email);
-        compareCertCode(certCode, savedCertCode);
-        mailRedisRepository.saveVerifiedEmail(email);
+    public Boolean isValidCode(CertRequest certRequest) {
+        String savedCertCode = mailRedisRepository.findCertCodeByEmail(certRequest.email());
+        compareCertCode(certRequest.certCode(), savedCertCode);
+        mailRedisRepository.saveVerifiedEmail(certRequest.email());
         return true;
-    }
-
-    public void checkVerifiedEmail(String email) {
-        if (mailRedisRepository.findVerifiedEmail(email) == null)
-            throw new IllegalArgumentException("");
     }
 
     private void compareCertCode(String certCode, String savedCertCode) {

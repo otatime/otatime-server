@@ -24,7 +24,7 @@ public record JoinRequest(
 
         String profileImageUrl,
 
-        String certCode
+        String certToken
 
 ) {
 }

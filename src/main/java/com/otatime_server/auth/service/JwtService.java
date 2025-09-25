@@ -70,6 +70,22 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
+    public String makeCertToken(String certCode) {
+        Date now = new Date();
+        return JWT.create()
+                .withSubject("CERT_CODE")
+                .withExpiresAt(new Date(now.getTime() + accessTokenExpirationPeriod))
+                .withClaim("CERT_CODE", certCode)
+                .sign(Algorithm.HMAC512(secretKey));
+    }
+
+    public void checkTokenToEmail(String token, String email) {
+        String tokenEmail = extractEmail(token);
+        if (!tokenEmail.equals(email)) {
+            throw new IllegalArgumentException("토큰에 문제 있습니다.");
+        }
+    }
+
     public String extractToken(HttpServletRequest request) {
         String header = request.getHeader(JWT_TOKEN);
         if (header != null) {

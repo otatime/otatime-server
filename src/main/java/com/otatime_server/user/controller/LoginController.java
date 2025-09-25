@@ -32,7 +32,7 @@ public class LoginController {
 
     @PostMapping("/join")
     public CommonResponse<UserResponse> join(@RequestBody JoinRequest joinRequest) {
-        mailService.checkCertCode(joinRequest.email(), joinRequest.certCode());
+        jwtService.checkTokenToEmail(joinRequest.certToken(), joinRequest.email());
         return new CommonResponse<>(userLoginService.join(joinRequest));
     }
 

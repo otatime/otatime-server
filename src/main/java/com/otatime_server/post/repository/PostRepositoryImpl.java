@@ -101,21 +101,22 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         .fetch()
                 : Collections.emptyList();
 
-        // 조건: 해당 날짜의 post
+        // 조건: 특정 날짜가 진행 기간 안에 포함되는 포스트
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(post.startDate.eq(date));
+        builder.and(post.startDate.loe(date))   // startDate <= date
+                .and(post.endDate.goe(date));    // endDate >= date
 
-        // 전체 개수 조회
+        // 전체 개수 조회 (중복 제거 필요하면 distinct)
         Long total = getSize(builder);
 
         if (total == null || total == 0) {
             return new PageImpl<>(Collections.emptyList(), pageable, 0);
         }
 
-        // 실제 데이터 조회 (내림차순)
+        // 실제 데이터 조회
         List<Post> posts = queryFactory.selectFrom(post)
                 .where(builder)
-                .orderBy(post.startDate.desc(), post.id.desc()) // 내림차순
+                .orderBy(post.startDate.desc(), post.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -127,6 +128,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         return new PageImpl<>(result, pageable, total);
     }
+
 
     @Override
     public Page<PostDetail> getMonthlyPosts(Pageable pageable, LocalDate firstDay, LocalDate lastDay, Long userId) {
@@ -174,14 +176,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         // 1. Native Query - 게시글 목록 조회
         String sql = """
         SELECT * FROM post
-        WHERE start_date >= :today
-          AND MATCH(title, details) AGAINST(:query IN BOOLEAN MODE)
+        WHERE MATCH(title, details) AGAINST(:query IN BOOLEAN MODE)
         ORDER BY start_date, post_id
         LIMIT :limit OFFSET :offset
     """;
 
         List<Post> posts = entityManager.createNativeQuery(sql, Post.class)
-                .setParameter("today", today)
                 .setParameter("query", "+" + query + "*")
                 .setParameter("limit", pageable.getPageSize())
                 .setParameter("offset", pageable.getOffset())
@@ -195,12 +195,10 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         String countSql = """
         SELECT COUNT(*)
         FROM post
-        WHERE start_date >= :today
-          AND MATCH(title, details) AGAINST(:query IN BOOLEAN MODE)
+        WHERE MATCH(title, details) AGAINST(:query IN BOOLEAN MODE)
     """;
 
         Number totalCount = (Number) entityManager.createNativeQuery(countSql)
-                .setParameter("today", today)
                 .setParameter("query", "+" + query + "*")
                 .getSingleResult();
 

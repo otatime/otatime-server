@@ -124,6 +124,11 @@ public class PostService {
     }
 
     public Page<PostDetail> getDatePage(Pageable pageable, String startDate, String email) {
+
+        LocalDate date = toLocalDate(startDate);
+        System.out.println("request date = " + startDate);
+        System.out.println("parsed LocalDate = " + date);
+
         User user = getUser(email);
         Long userId = user == null ? null : user.getId();
         return postRepository.getDailyPosts(pageable, toLocalDate(startDate), userId);

@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/posts").permitAll()
                         .requestMatchers("/email").permitAll()
                         .requestMatchers("/login").permitAll()
+                        .requestMatchers("/cert").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class);

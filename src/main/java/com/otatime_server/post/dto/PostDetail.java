@@ -16,10 +16,11 @@ public record PostDetail(
         String region,
         String location,
         boolean isLiked,
-        long DDay
+        long DDay,
+        List<String> imageUrls
 ) {
 
-    public static PostDetail of(Post post, List<Long> likeIds) {
+    public static PostDetail of(Post post, List<Long> likeIds, List<String> imageUrls) {
         return new PostDetail(
                 post.getId(),
                 post.getTitle(),
@@ -31,7 +32,8 @@ public record PostDetail(
                 post.getRegion().toString(),
                 post.getAddress().getStreet(),
                 likeIds.contains(post.getId()),
-                dday(post.getStartDate())
+                dday(post.getStartDate()),
+                imageUrls
         );
     }
 

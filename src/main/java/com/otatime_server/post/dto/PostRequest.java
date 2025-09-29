@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import org.hibernate.validator.constraints.URL;
 
 public record PostRequest(
@@ -51,6 +52,8 @@ public record PostRequest(
         Double latitude,
 
         @NotNull(message = "경도는 필수 입력값입니다.")
-        Double longitude
+        Double longitude,
+
+        List<String> imageUrls
 ) {
 }

@@ -3,6 +3,7 @@ package com.otatime_server.post.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import org.hibernate.validator.constraints.URL;
 
 public record PostUpdateRequest(
@@ -43,6 +44,8 @@ public record PostUpdateRequest(
 
         @NotBlank(message = "위치는 필수 입력값입니다.")
         @Size(max = 255, message = "위치는 최대 {max}자까지 가능합니다.")
-        String location
+        String location,
+
+        List<String> imageUrls
 ) {
 }

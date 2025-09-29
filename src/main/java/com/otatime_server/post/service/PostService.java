@@ -7,6 +7,7 @@ import com.otatime_server.post.domain.Category;
 import com.otatime_server.post.domain.EventStatus;
 import com.otatime_server.post.domain.EventType;
 import com.otatime_server.post.domain.Post;
+import com.otatime_server.post.domain.PostImage;
 import com.otatime_server.post.domain.PostStatus;
 import com.otatime_server.post.domain.Region;
 import com.otatime_server.post.domain.ReportHistory;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +70,8 @@ public class PostService {
 
         Address savedAddress = addressRepository.save(address);
 
+        List<PostImage> images = toEntity(reportRequest.imageUrls());
+
         Post post = new Post(
                 reportRequest.title(),
                 reportRequest.details(),
@@ -79,7 +83,8 @@ public class PostService {
                 category,
                 eventType,
                 PostStatus.PENDING,
-                savedAddress
+                savedAddress,
+                images
         );
 
         Post savedPost = postRepository.save(post);
@@ -142,7 +147,13 @@ public class PostService {
 
     public List<PostDetail> getBanner() {
         return postRepository.findTop4ByStartDateClosest(LocalDate.now()).stream()
-                .map(p -> PostDetail.of(p, Collections.emptyList()))
+                .map(p -> PostDetail.of(p, Collections.emptyList(), getImages(p)))
+                .toList();
+    }
+
+    private List<String> getImages(Post post) {
+        return post.getImages().stream()
+                .map(PostImage::getUrl)
                 .toList();
     }
 
@@ -174,7 +185,7 @@ public class PostService {
     public PostDetail getPostDetail(Long postId, String email) {
         Post post = getPost(postId);
         List<Long> postIdByUserId = getLikeList(email);
-        return PostDetail.of(post, postIdByUserId);
+        return PostDetail.of(post, postIdByUserId, getImages(post));
     }
 
     private List<Long> getLikeList(String email) {
@@ -244,6 +255,8 @@ public class PostService {
 
         Address savedAddress = addressRepository.save(address);
 
+        List<PostImage> images = toEntity(postRequest.imageUrls());
+
         Post post = new Post(
                 postRequest.title(),
                 postRequest.details(),
@@ -255,12 +268,21 @@ public class PostService {
                 category,
                 eventType,
                 PostStatus.PUBLISHED,
-                savedAddress
+                savedAddress,
+                images
         );
 
         Post savedPost = postRepository.save(post);
 
         return new PostResponse(savedPost.getId());
+    }
+
+    private List<PostImage> toEntity(List<String> strings) {
+        List<PostImage> postImages = new ArrayList<>();
+        for (String string : strings) {
+            postImages.add(new PostImage(string));
+        }
+        return postImages;
     }
 
     @Transactional

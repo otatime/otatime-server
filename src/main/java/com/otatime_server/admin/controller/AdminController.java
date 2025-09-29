@@ -20,6 +20,7 @@ import com.otatime_server.user.dto.LoginRequest;
 import com.otatime_server.user.dto.UserResponse;
 import com.otatime_server.user.service.UserLoginService;
 import com.otatime_server.user.service.UserService;
+import java.util.ArrayList;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -71,7 +72,7 @@ public class AdminController {
         Page<Post> result = postService.getPostList(PostStatus.PUBLISHED);
         return new CommonResponse<>(new PostListResponse(
                 result.getContent().stream()
-                        .map(it -> PostDetail.of(it, Collections.emptyList()))
+                        .map(it -> PostDetail.of(it, Collections.emptyList(), new ArrayList<>()))
                         .toList(),
                 PageInfo.of(result)
         ));
@@ -82,7 +83,7 @@ public class AdminController {
         Page<Post> result = postService.getPostList(PostStatus.PENDING);
         return new CommonResponse<>(new PostListResponse(
                 result.getContent().stream()
-                        .map(it -> PostDetail.of(it, Collections.emptyList()))
+                        .map(it -> PostDetail.of(it, Collections.emptyList() , new ArrayList<>()))
                         .toList(),
                 PageInfo.of(result)
         ));

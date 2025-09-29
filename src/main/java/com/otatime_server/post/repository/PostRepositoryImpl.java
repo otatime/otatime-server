@@ -12,6 +12,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -84,7 +85,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         // DTO 매핑
         List<PostDetail> result = posts.stream()
-                .map(p -> PostDetail.of(p, likeIds))
+                .map(p -> PostDetail.of(p, likeIds, new ArrayList<>()))
                 .toList();
 
         return new PageImpl<>(result, pageable, total);
@@ -123,7 +124,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         // DTO 매핑
         List<PostDetail> result = posts.stream()
-                .map(p -> PostDetail.of(p, likeIds))
+                .map(p -> PostDetail.of(p, likeIds, new ArrayList<>()))
                 .toList();
 
         return new PageImpl<>(result, pageable, total);
@@ -163,7 +164,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         // DTO 매핑
         List<PostDetail> result = posts.stream()
-                .map(p -> PostDetail.of(p, likeIds))
+                .map(p -> PostDetail.of(p, likeIds, new ArrayList<>()))
                 .toList();
 
         return new PageImpl<>(result, pageable, total);
@@ -171,7 +172,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     @Override
     public Page<PostDetail> searchPosts(Pageable pageable, String query, Long userId) {
-        LocalDate today = LocalDate.now();
 
         // 1. Native Query - 게시글 목록 조회
         String sql = """
@@ -219,7 +219,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         // 4. DTO 매핑
         List<PostDetail> result = posts.stream()
-                .map(p -> PostDetail.of(p, likeIds))
+                .map(p -> PostDetail.of(p, likeIds, new ArrayList<>()))
                 .toList();
 
         return new PageImpl<>(result, pageable, total);

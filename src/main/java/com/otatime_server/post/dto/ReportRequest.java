@@ -1,6 +1,7 @@
 package com.otatime_server.post.dto;
 
 import jakarta.validation.constraints.*;
+import java.util.List;
 import org.hibernate.validator.constraints.URL;
 
 public record ReportRequest(
@@ -48,6 +49,8 @@ public record ReportRequest(
         Double latitude,
 
         @NotNull(message = "경도는 필수 입력값입니다.")
-        Double longitude
+        Double longitude,
+
+        List<String> imageUrls
 ) {
 }

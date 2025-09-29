@@ -11,8 +11,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,8 +53,11 @@ public class Post {
     @JoinColumn(name = "address_id")
     private Address address;
 
+    @OneToMany(mappedBy = "post")
+    private List<PostImage> images;
+
     public Post(String title, String details, LocalDate startDate, LocalDate endDate, String imageUrl,
-                Region region, EventStatus eventStatus, Category category, EventType eventType, PostStatus postStatus, Address address) {
+                Region region, EventStatus eventStatus, Category category, EventType eventType, PostStatus postStatus, Address address, List<PostImage> images) {
         this.title = title;
         this.details = details;
         this.startDate = startDate;
@@ -65,6 +70,10 @@ public class Post {
         this.postStatus = postStatus;
         this.address = address;
         address.add(this);
+        this.images = images;
+        for (PostImage image : images) {
+            image.add(this);
+        }
     }
 
     public Long update(PostUpdateRequest postUpdateRequest) {
